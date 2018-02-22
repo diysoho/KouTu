@@ -15,6 +15,7 @@
     </head>
     <body>
         <div>
+            <input id="imgSrc" type="text" value="https://img.alicdn.com/bao/uploaded/i4/199138789/TB1OZWLXQSWBuNjSszdXXbeSpXa_!!0-item_pic.jpg" />
             <button id="bl">保留</button>
             <button id="qc">去除</button>
             <button id="cs">生成</button>
@@ -22,7 +23,7 @@
         </div>
         <div class="flex">
             <div><canvas id="lcan"></canvas><canvas id="lcan2"></canvas></div>
-            <div><canvas id="rcan"></canvas></div>        
+            <div><canvas id="rcan"></canvas></div>
         </div>
     </body>
     <script type="text/javascript">
@@ -38,14 +39,15 @@
             this.bl = document.querySelector('#bl');
             this.qc = document.querySelector('#qc');
             this.cs = document.querySelector('#cs');
+            this.imgInput = document.querySelector('#imgSrc');
         }
 
         KouTu.prototype.init = function (_obj) {
             var _obj = _obj || {};
             var _this = this;            
 
-            this.cw = this.lcan.width = this.lcan2.width = this.rcan.width = _obj.width || 800;
-            this.ch = this.lcan.height = this.lcan2.height = this.rcan.height = _obj.height || 500;
+            this.cw = this.lcan.width = this.lcan2.width = this.rcan.width = _obj.width || 400;
+            this.ch = this.lcan.height = this.lcan2.height = this.rcan.height = _obj.height || 400;
             this.lineWidth = _obj.lineWidth || 10;
             this.type = 'bl';
             this.canRect = this.lcan.getBoundingClientRect();
@@ -69,7 +71,7 @@
 
             this.limg = new Image();
             this.limg.setAttribute('crossOrigin','anonymous');
-            this.limg.src = 'https://img.alicdn.com/bao/uploaded/i4/199138789/TB1OZWLXQSWBuNjSszdXXbeSpXa_!!0-item_pic.jpg';
+            this.limg.src = this.imgInput.value;
 
             this.limg.onload = function () {
                 _this.imgW = _this.limg.naturalWidth;
@@ -100,7 +102,7 @@
                     type: _this.type, 
                 }
                 _this.pointArr.push(_this.lineXY);
-
+                _this.xrArrPush(e);
             } , false);
 
             document.addEventListener('mousemove', function (e) {
@@ -121,6 +123,7 @@
 
         KouTu.prototype.drawImg = function () {
             this.lctx.drawImage(this.limg,(this.cw-this.imgW*this.zoom)/2,(this.ch-this.imgH*this.zoom)/2,this.imgW*this.zoom,this.imgH*this.zoom);
+            //this.lctx.drawImage(this.limg,0,0,this.imgW,this.imgH);
         } 
 
         KouTu.prototype.xrArrPush = function (e) {
@@ -173,6 +176,7 @@
 
         KouTu.prototype.save = function () {
             this.imageData = this.lctx.getImageData(0,0,this.cw,this.ch);
+            this.imageData2 = this.lctx.getImageData(0,0,this.cw,this.ch);
             this.can2Data = this.lctx2.getImageData(0,0,this.cw,this.ch);
     
             this.kouObj = {};
@@ -212,27 +216,40 @@
                 var g = this.imageData.data[i+1];
                 var b = this.imageData.data[i+2];
                 var str = r + '_' + g + '_' + b;
+                
+                var k = 10;
 
-                // if (!this.showColorObj[str]) {
-                //     this.imageData.data[i+3] = 0;
-                // }
+                var blean = false;
                 
                 for (var n = 0; n < show_le; n++ ) {
                     var ele = this.showColorArr[n];
-                    var blean = false;
-                    var k = 20;
-                    if ( (ele[0] >= (r - k) && ele[0] <= (r + k) && ele[1] >= (g - k)  && ele[1] <= (g + k) && ele[2] >= (b - k) && ele[2] <= (b + k)) ) {
-                        this.imageData.data[i+3] = 0;
-                        break;   
+
+                    //去除
+                    // if ( (ele[0] >= (r - k) && ele[0] <= (r + k) && ele[1] >= (g - k)  && ele[1] <= (g + k) && ele[2] >= (b - k) && ele[2] <= (b + k)) ) {
+                    //     this.imageData.data[i+3] = 0;
+                    //     break;   
+                    // }
+                    
+                    //保留
+                    if (ele[0] >= (r - k) && ele[0] <= (r + k) && ele[1] >= (g - k)  && ele[1] <= (g + k) && ele[2] >= (b - k) && ele[2] <= (b + k)) {
+                        blean = true;
+                        break;
                     }
+
                 }
+                
+                //保留的代码
+                if (!blean) {
+                    this.imageData.data[i+3] = 0;
+                };
 
             }
 
             this.rctx.clearRect(0,0,this.cw,this.ch);
     
 
-            console.log('结果',this.kouObj,this.showColorObj,this.showColorArr,show_le);
+            //console.log('结果',this.kouObj,this.showColorObj,this.showColorArr,show_le);
+            console.log('111',this.imageData2,this.showColorArr);
             this.rctx.putImageData(this.imageData,0,0);
         }
 
