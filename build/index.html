@@ -15,7 +15,9 @@
     </head>
     <body>
         <div>
-            <input id="imgSrc" type="text" value="https://img.alicdn.com/bao/uploaded/i4/199138789/TB1OZWLXQSWBuNjSszdXXbeSpXa_!!0-item_pic.jpg" />
+            <!-- https://img.alicdn.com/bao/uploaded/i1/199138789/TB1G6Rko0bJ8KJjy1zjXXaqapXa_!!0-item_pic.jpg -->
+            <!-- https://img.alicdn.com/bao/uploaded/i4/199138789/TB1OZWLXQSWBuNjSszdXXbeSpXa_!!0-item_pic.jpg -->
+            <input id="imgSrc" type="text" value="https://img.alicdn.com/bao/uploaded/i1/199138789/TB1G6Rko0bJ8KJjy1zjXXaqapXa_!!0-item_pic.jpg" />
             <button id="bl">保留</button>
             <button id="qc">去除</button>
             <button id="cs">生成</button>
@@ -217,31 +219,37 @@
                 var b = this.imageData.data[i+2];
                 var str = r + '_' + g + '_' + b;
                 
-                var k = 10;
+                var k = 30;
 
-                var blean = false;
-                
-                for (var n = 0; n < show_le; n++ ) {
-                    var ele = this.showColorArr[n];
-
+                if (true) {
                     //去除
-                    // if ( (ele[0] >= (r - k) && ele[0] <= (r + k) && ele[1] >= (g - k)  && ele[1] <= (g + k) && ele[2] >= (b - k) && ele[2] <= (b + k)) ) {
-                    //     this.imageData.data[i+3] = 0;
-                    //     break;   
-                    // }
-                    
-                    //保留
-                    if (ele[0] >= (r - k) && ele[0] <= (r + k) && ele[1] >= (g - k)  && ele[1] <= (g + k) && ele[2] >= (b - k) && ele[2] <= (b + k)) {
-                        blean = true;
-                        break;
+                    for (var n = 0; n < show_le; n++ ) {
+                        var ele = this.showColorArr[n];
+                        if ( (ele[0] >= (r - 0.2126 * k) && ele[0] <= (r + 0.2126 * k) && ele[1] >= (g - 0.7152 * k)  && ele[1] <= (g + 0.7152 * k) && ele[2] >= (b - 0.0722 * k) && ele[2] <= (b + 0.0722 * k)) ) {
+                            this.imageData.data[i+3] = 0;
+                            break;   
+                        }
                     }
+                } else {
+                    //保留
+                    var blean = false;
+                    for (var n = 0; n < show_le; n++ ) {
+                        var ele = this.showColorArr[n];
 
+                        // (0.2126 * r + 0.7152 * g + 0.0722 * b)
+
+                        //保留
+                        if (ele[0] >= (r - 0.2126 * k) && ele[0] <= (r + 0.2126 * k) && ele[1] >= (g - 0.7152 * k)  && ele[1] <= (g + 0.7152 * k) && ele[2] >= (b - 0.0722 * k) && ele[2] <= (b + 0.0722 * k)) {
+                            blean = true;
+                            break;
+                        }
+                    }
+                    
+                    //保留的代码
+                    if (!blean) {
+                        this.imageData.data[i+3] = 0;
+                    };
                 }
-                
-                //保留的代码
-                if (!blean) {
-                    this.imageData.data[i+3] = 0;
-                };
 
             }
 
